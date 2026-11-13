@@ -1,3 +1,14 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="AI가 무엇을 기준으로 추천하느냐가, 누가 잊히는지를 정한다. 추천 알고리즘과 연결 속 고립을 다룬 5분짜리 웹 어드벤처.">
+<meta property="og:title" content="가중치 0 — 1,024명의 친구, 0번의 대화">
+<meta property="og:description" content="AI가 무엇을 기준으로 추천하느냐가, 누가 잊히는지를 정한다.">
+<meta name="theme-color" content="#13111a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2313111a'/%3E%3Cline x1='18' y1='42' x2='46' y2='22' stroke='%23ffb35c' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='18' cy='42' r='8' fill='%23ffb35c'/%3E%3Ccircle cx='46' cy='22' r='8' fill='%236fe3c1'/%3E%3C/svg%3E">
+<style>img{max-width:100%}</style>
 <title>가중치 0</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +30,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:12px;box-sizing:border-box;overflow:hidden}
 #viewport{position:relative;width:100%;height:100%;min-height:240px;overflow:hidden}
-#stage{position:absolute;left:50%;top:50%;width:960px;height:540px;transform-origin:center center;overflow:hidden;border-radius:12px;background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.5);user-select:none;-webkit-user-select:none}
+#stage{position:absolute;left:50%;top:50%;width:960px;height:540px;transform-origin:center center;overflow:hidden;border-radius:12px;background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.5);user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 canvas{display:block}
 #bg{position:absolute;inset:0;width:960px;height:540px}
 .scene{position:absolute;inset:0}
@@ -54,20 +65,18 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
 .char.dim{filter:brightness(.5)}
 #c-edge{width:84px;height:84px}
 .char svg{width:100%;height:100%;display:block;overflow:visible}
-.char.on > svg{animation:breathe 4.5s ease-in-out infinite}
+#c-saebom.on img{animation:breathe 4.5s ease-in-out infinite}
 @keyframes breathe{50%{transform:translateY(-2px)}}
-.eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.4s infinite}
-@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
 .orb{position:relative}
 .ring{position:absolute;inset:-9px;border:1px solid rgba(111,227,193,.35);border-radius:50%;animation:spin 9s linear infinite}
 .ring::before{content:"";position:absolute;top:-3px;left:calc(50% - 3px);width:6px;height:6px;border-radius:50%;background:var(--edge);box-shadow:0 0 8px var(--edge)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #seoAvatar{background:#cbbbe6;overflow:hidden;padding:0}
-#c-saebom{width:190px;height:285px}
-#c-saebom img{width:100%;height:100%;object-fit:cover;display:block;border-radius:18px;
-  -webkit-mask-image:radial-gradient(ellipse 52% 54% at 50% 44%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 52% 54% at 50% 44%,#000 62%,transparent 100%)}
-#c-saebom.on img{animation:breathe 4.5s ease-in-out infinite}
-#seoAvatar svg{width:100%;height:100%;display:block}
+#c-saebom{width:150px;height:150px;margin-top:50px}
+#stage.portrait #c-saebom{margin-top:0}
+#c-saebom img{width:100%;height:100%;object-fit:cover;object-position:50% 26%;display:block;box-sizing:border-box;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 2px var(--tie),0 10px 30px rgba(0,0,0,.55);transition:filter 1.8s}
+#stage[data-mood="gray"] #c-saebom img{filter:grayscale(.85) brightness(.7)}
+#stage[data-mood="half"] #c-saebom img{filter:grayscale(.45) brightness(.86)}
 .orb{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;
   background:radial-gradient(circle at 38% 34%,#eafff8 0%,var(--edge) 50%,rgba(111,227,193,.12) 72%,transparent 74%);
   box-shadow:0 0 40px rgba(111,227,193,.4);animation:float 3.2s ease-in-out infinite}
@@ -196,17 +205,29 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
 #finale.dark{background:rgba(8,7,11,.94)}
 #finLine{margin:0;font-family:var(--f-display);font-size:32px;line-height:1.55;letter-spacing:-.01em;text-wrap:balance;opacity:0;transition:opacity 2s}
 #finSub{margin:0;max-width:600px;font-size:15px;line-height:1.7;color:#d8d0e4;opacity:0;transition:opacity 1.4s .9s}
-#finStats{font-size:12.5px;color:var(--muted);opacity:0;transition:opacity 1.2s 1.6s}
+#finStats{font-size:12.5px;line-height:1.8;color:var(--muted);opacity:0;transition:opacity 1.2s 1.6s}
 #finBtns{display:flex;gap:8px;opacity:0;transition:opacity 1.2s 2s}
 #finale .on{opacity:1}
-#credits p{margin:0 0 10px;font-size:14px;line-height:1.6;color:#d8d0e4}
-#credits b{font-family:var(--f-display);color:var(--ink);margin-right:8px}
-#mathList,#credits{position:absolute;left:70px;right:70px;top:60px;height:400px;padding:22px 28px;box-sizing:border-box;z-index:47;overflow:auto;background:#1d1a26;cursor:pointer}
 .closeHint{position:absolute;right:22px;bottom:16px;font-size:12px;color:var(--muted)}
-#mathList h3,#credits h3{margin:0 0 12px;font-family:var(--f-display);font-size:19px;color:var(--edge)}
-#mathList dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:10px 16px;font-size:14px;line-height:1.55}
-#mathList dt{font-family:var(--f-display);font-weight:700}
-#mathList dd{margin:0;color:#d8d0e4}
+#info{position:absolute;left:56px;right:56px;top:46px;bottom:22px;z-index:48;display:flex;flex-direction:column;background:#1d1a26;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.tabs{display:flex;gap:4px;align-items:center;padding:10px 14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs [data-tab]{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-size:14.5px;padding:8px 10px;font-family:var(--f-display);font-weight:700;margin-bottom:-1px}
+.tabs [data-tab][aria-selected="true"]{color:var(--ink);border-bottom-color:var(--tie)}
+#infoClose{margin-left:auto;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:4px 12px;font-size:12px}
+#infoBody{flex:1;overflow:auto;padding:16px 22px 22px;font-size:14px;line-height:1.7;color:#d8d0e4}
+#infoBody h3{margin:16px 0 6px;font-family:var(--f-display);font-size:16px;color:var(--tie)}
+#infoBody h3:first-child{margin-top:0}
+#infoBody p{margin:0 0 8px}
+#infoBody .big{font-family:var(--f-display);font-size:19px;color:var(--ink);line-height:1.5}
+#infoBody .lead{color:var(--muted);font-size:13px}
+.mcard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#221e2d}
+.mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.mhead b{font-family:var(--f-display);font-size:15.5px;color:var(--ink)}
+.mhead .sc{font-size:11.5px;color:var(--edge);white-space:nowrap}
+.mcard p{margin:0 0 4px}
+.mcard em{font-style:normal;display:inline-block;min-width:78px;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.fx{font-family:var(--f-num);background:#13111a;border:1px solid var(--line);padding:1px 6px;border-radius:6px;color:var(--ink);font-size:12.5px;white-space:nowrap}
+.cr b{font-family:var(--f-display);color:var(--ink);display:inline-block;min-width:84px}
 
 /* ===== 세로 화면(휴대폰) 배치: 무대 폭 440, 높이는 화면 비율에 맞춰 --H ===== */
 #stage.portrait .title{font-size:74px}
@@ -251,12 +272,18 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
 #stage.portrait #finSub{font-size:14.5px}
 #stage.portrait #finStats{font-size:12px;line-height:1.7}
 #stage.portrait #finBtns{flex-wrap:wrap;justify-content:center}
-#stage.portrait #mathList,#stage.portrait #credits{left:12px;right:12px;top:52px;height:auto;max-height:calc(var(--H) - 70px);padding:18px 18px 34px}
-#stage.portrait #mathList dl{grid-template-columns:1fr;gap:2px 0}
-#stage.portrait #mathList dd{margin-bottom:10px}
+#stage.portrait #info{left:8px;right:8px;top:48px;bottom:8px}
+#stage.portrait .tabs{padding:8px 8px 0}
+#stage.portrait .tabs [data-tab]{font-size:13px;padding:7px 6px}
+#stage.portrait #infoBody{padding:14px 14px 18px;font-size:13.5px}
+#stage.portrait .mcard em{display:block;margin-top:4px}
+#stage.portrait .fx{white-space:normal}
 
-@media (prefers-reduced-motion: reduce){.orb,#dlgMore,.eyes,.ring,.char.on > svg,#c-saebom.on img{animation:none}.char{transition:none}}
+@media (prefers-reduced-motion: reduce){.orb,#dlgMore,.ring,#c-saebom.on img{animation:none}.char{transition:none}}
 </style>
+</head>
+<body>
+
 
 <div id="viewport">
 <div id="stage" aria-label="가중치 0 게임 화면">
@@ -265,10 +292,10 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
   <!-- 타이틀 -->
   <section class="scene" id="scene-title">
     <div class="titleBox">
-      <div class="eyebrow">제3회 포항 인공지능예술주간 · 출품작 v1 프로토타입</div>
+      <div class="eyebrow">제3회 포항 인공지능예술주간 · 2026 청소년 인공지능예술작품 특별 공모 출품작</div>
       <h1 class="title">가중치 <em>0</em></h1>
       <p class="subtitle">1,024명의 친구, 0번의 대화</p>
-      <button class="btn" id="startBtn" style="margin-top:14px;font-size:17px;padding:11px 26px">시작하기</button>
+      <div style="display:flex;gap:10px;margin-top:14px"><button class="btn" id="startBtn" style="font-size:17px;padding:11px 26px">시작하기</button><button class="btn ghost" data-open="about" style="font-size:15px;padding:11px 18px">작품 설명</button></div>
       <div class="hint">소리를 켜고 플레이하세요 · 화면을 클릭하거나 스페이스 키로 대사를 넘깁니다 · 약 5분</div>
     </div>
   </section>
@@ -336,10 +363,8 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
     <div id="finale" hidden>
       <div id="finBg"></div>
       <p id="finLine"></p><p id="finSub"></p><div id="finStats"></div>
-      <div id="finBtns"><button class="btn ghost" id="finBack">◀ 이전 장면</button><button class="btn ghost" id="mathListBtn">수학 노트</button><button class="btn ghost" id="creditBtn">만든 사람</button><button class="btn" id="restartBtn">처음부터</button></div>
+      <div id="finBtns"><button class="btn ghost" id="finBack">◀ 메시지 다시 쓰기</button><button class="btn ghost" data-open="about">작품 설명</button><button class="btn ghost" data-open="math">인공지능 수학의 원리</button><button class="btn ghost" data-open="credits">만든 사람</button><button class="btn" id="restartBtn">처음부터</button></div>
     </div>
-    <div id="mathList" class="panel" hidden></div>
-    <div id="credits" class="panel" hidden></div>
   </section>
 
   <!-- 캐릭터 -->
@@ -348,8 +373,12 @@ button:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
     <svg viewBox="0 0 84 84" width="84" height="84"><line x1="27" y1="50" x2="57" y2="34" stroke="#0d2a23" stroke-width="4" stroke-linecap="round"/><circle cx="27" cy="50" r="7" fill="#0d2a23"/><circle cx="57" cy="34" r="7" fill="#0d2a23"/></svg>
   </div></div>
 
-  <div id="hud" hidden><div id="hudLeft"><button id="backBtn" aria-label="이전 장면으로">◀ 이전 장면</button><span id="sceneName"></span></div><div id="hudRight"><button id="muteBtn" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg> 소리 끄기</button><button id="mathBtn" aria-pressed="false">수학 보기</button></div></div>
+  <div id="hud" hidden><div id="hudLeft"><button id="backBtn" aria-label="이전 장면으로">◀ 이전 장면</button><span id="sceneName"></span></div><div id="hudRight"><button id="muteBtn" aria-pressed="false"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg> 소리 끄기</button><button id="mathBtn" aria-pressed="false">수학 원리</button></div></div>
   <div id="mathNote" class="panel" hidden></div>
+  <div id="info" class="panel" hidden role="dialog" aria-label="작품 정보">
+    <div class="tabs" role="tablist"><button role="tab" data-tab="about">작품 설명</button><button role="tab" data-tab="math">인공지능 수학의 원리</button><button role="tab" data-tab="credits">만든 사람</button><button id="infoClose">닫기 ✕</button></div>
+    <div id="infoBody"></div>
+  </div>
   <div id="blocker" hidden></div>
   <div id="dialog" hidden><div id="dlgName"></div><div id="dlgText"></div><button id="dlgBack" hidden aria-label="이전 대사 보기">◀ 이전 대사</button><div id="dlgMore">▼</div></div>
   <div id="fade"></div>
@@ -366,6 +395,7 @@ const SCRIPT = {
     ['나레이션', '생일 밤 12시. 알림이 132개 와 있다.'],
     ['새봄', '좋아요 132개, 축하 댓글 41개.'],
     ['새봄', '…그런데 지금 전화할 사람은 아무도 없다.'],
+    ['나레이션', '프로필 사진 속의 새봄만 환하게 웃고 있다.'],
     ['나레이션', '피드 AI는 오늘도 가장 활발한 사람들을 먼저 보여 준다.'],
   ],
   afterFeed: [
@@ -397,8 +427,8 @@ const SCRIPT = {
   ],
   memKeys: [   // 직접 쓰기에서 '둘만 아는 기억'으로 인정할 낱말 (순서: 바닷가, 포스터, 급식)
     ['바다', '바닷가', '노을', '해질', '해 질', '파도', '등대', '모래', '해변', '윤슬'],
-    ['포스터', '축제', '동아리', '그림', '그린', '물감', '붓'],
-    ['마라탕', '급식', '점심', '밥', '먹자', '먹을래', '국물'],
+    ['포스터', '축제', '동아리', '물감'],
+    ['마라탕', '급식'],
   ],
   memoryNames: ['바닷가', '포스터', '급식'],
   memories: [  // 사진을 누르면 열리는 기억 (순서대로 메시지 1·2·3번째 칸과 연결)
@@ -422,6 +452,7 @@ const SCRIPT = {
   afterReplyGood: [
     ['엣지', '내가 쓴 문장보다 네가 고친 문장이 더 멀리 갔어.'],
     ['엣지', '둘만 아는 이야기는 내가 만들 수 없거든. 나는 문을 가리킬 수만 있어.'],
+    ['엣지', '그리고 서윤이가 많이 힘들어 보이면 혼자 해결하려고 하지 마. 믿을 수 있는 어른에게도 꼭 알려 줘.'],
     ['엣지', '중학교 3학년 때 같은 반이던 24명, 지금은 모두 다른 학교야. 같은 사람들을 두 추천 AI로 8주 동안 지켜볼까?'],
   ],
   afterReplyWeak: [
@@ -433,8 +464,10 @@ const SCRIPT = {
     ['엣지', '왼쪽은 활발한 사람만 계속 추천받는 세계야. 연결이 많은 사람에게 연결이 더 몰리고, 조용한 사람은 흐려져.'],
     ['엣지', '오른쪽은 멀어진 선을 먼저 찾는 세계야. 같은 사람들인데, 기준 하나가 다를 뿐이야.'],
     ['엣지', '그리고 내 선은 조금씩 가늘어질 거야. 그게 내가 잘하고 있다는 뜻이야.'],
+    ['새봄', '…다음 문장은, 내가 직접 쓸게.'],
   ],
   endLine: 'AI가 무엇을 기준으로 추천하느냐가,<br>누가 잊히는지를 정한다.',
+  endName: { good: '다시 이어진 선', mid: '붙잡은 선', none: '엣지의 문장' },   // 결말 3가지의 이름
   endSub: {
     good: '그리고 마지막 문장은 새봄이 직접 썼다. 서윤과의 선은 다시 굵어지고 있다.',
     mid: '새봄의 한 문장이, 끊어지기 직전의 선을 붙잡았다.',
@@ -447,19 +480,39 @@ const SCRIPT = {
     write: '<b>편집 거리</b> 엣지의 초안을 지금 문장으로 바꾸는 데 필요한 최소 글자 수정(넣기·지우기·바꾸기) 횟수.<br><b>연결 굵기</b> = 0.15 + 0.25 × (둘만 아는 내용 수)<br>많이 고치는 것보다, 둘만 아는 내용이 연결을 만들어.<br><b>직접 쓰기</b> 내 문장을 글자 2개씩 묶은 벡터로 바꿔, 각 기억과의 코사인 유사도(관련도)를 계산해.<br><b>소리</b> 둘만 아는 내용이 하나 늘 때마다 화음에 음이 하나씩 더해져.',
     after: '<b>선호적 연결</b> 이미 연결이 많은 사람이 새 연결을 더 많이 얻는 부익부 구조야(Barabási·Albert, 1999).<br>이 시뮬레이션에서는 매주 모든 선이 0.75배로 가늘어지고, 대화 한 번마다 0.15씩 굵어져. 연결 굵기의 합이 0.35보다 작으면 흐려진 사람이야.<br><b>소리</b> 매주 왼쪽 세계는 왼쪽 스피커, 오른쪽 세계는 오른쪽 스피커에서 울려. 연결이 살아 있는 사람이 많을수록 음이 많아져.',
   },
-  mathNotes: [
-    ['가중치 그래프', '사람은 점, 관계는 선, 선의 굵기는 최근 대화의 양. 연결된 사람 수(차수)가 많아도 가중치의 합은 작을 수 있다.'],
-    ['추천 점수식', '피드 AI: 점수 = 최근 활동량. 엣지: 점수 = 예전 친밀도 × 감소율(= 예전 − 지금). 식의 기준 하나가 누가 보이고 누가 잊히는지를 정한다.'],
-    ['선호적 연결', '활동이 많은 사람이 더 자주 추천되어 연결을 더 많이 얻는 부익부 구조(Barabási·Albert, 1999). 활동량 순 추천은 이 구조를 키운다.'],
-    ['편집 거리', 'AI 원문을 내 문장으로 바꾸는 데 필요한 최소 글자 수정 횟수(Levenshtein, 1966). 이 작품에서 연결 굵기는 편집 거리가 아니라 둘만 아는 내용의 수로 정했다.'],
-    ['텍스트 유사도', '직접 쓴 문장은 글자를 2개씩 묶은 벡터(2-gram)로 바꾸고, 각 기억과의 코사인 유사도를 계산해 둘만 아는 내용이 담겼는지 판단한다. 기억과 관련된 낱말이 들어 있어도 연결된 것으로 본다.'],
-    ['소리로 듣는 데이터', '연결 굵기를 화음의 음 개수로, 각 세계에서 연결이 살아 있는 사람 수를 음 개수로 바꾸었다(데이터 소니피케이션). 서윤의 점에서는 가늘고 높은 음이 나며, 선이 가늘어질수록 작아진다.'],
+  about: [    // '작품 설명' 탭
+    ['한 문장', '<p class="big">AI가 무엇을 기준으로 추천하느냐가,<br>누가 잊히는지를 정한다.</p>'],
+    ['기획 의도', '<p>중학교 3학년 때 친했던 친구들이 고등학교에 오면서 서로 다른 학교로 흩어졌고, 연락은 조금씩 줄어들었습니다. SNS로는 여전히 이어져 있지만 피드에는 활동이 많은 사람만 보이고, 연락이 뜸해진 친구는 더 보이지 않게 됩니다. 이 작품은 추천 AI가 ‘최근 활동량’ 대신 ‘예전보다 연락이 크게 줄어든 친구’를 먼저 보여 준다면 어떨지 상상합니다.</p>'],
+    ['이야기와 장면', '<p><b>1. 숫자의 밤</b> 생일 밤 12시, 좋아요는 132개인데 전화할 사람이 없다. 피드 AI는 인기 많은 친구만 보여 준다.</p><p><b>2. 엣지의 알림</b> 새 추천 AI ‘엣지’가 기준을 하나 바꾸자, 추천 1위가 중학교 단짝 서윤으로 바뀐다.</p><p><b>3. 고쳐 쓰기</b> 엣지의 초안을 둘만 아는 기억으로 고치거나, 내 말로 직접 써서 서윤에게 보낸다.</p><p><b>4. 8주 후</b> 같은 친구들을 두 추천 AI로 8주 동안 살아 보게 하고, 두 세계를 나란히 비교한다.</p>'],
+    ['결말은 하나가 아닙니다', '<p>서윤에게 보낸 메시지에 둘만 아는 기억이 얼마나 담겼는지에 따라 서윤의 답장, 두 사람을 잇는 선의 굵기, 마지막 장면이 달라집니다.</p>'],
+    ['플레이 방법', '<p>화면을 누르거나 스페이스 키로 대사를 넘깁니다. ‘◀ 이전 대사’와 ‘◀ 이전 장면’으로 되돌아갈 수 있고, 휴대폰의 뒤로 버튼도 동작합니다. 소리를 켜고 플레이하는 것을 권합니다(휴대폰에서 소리가 나지 않으면 무음 모드를 해제해 주세요). 화면 위 ‘수학 원리’ 버튼을 누르면 장면마다 쓰인 식을 볼 수 있습니다.</p>'],
   ],
-  credits: [   // ✏️ 제작자 이름을 채워 넣으세요
+  mathNotes: [ // '인공지능 수학의 원리' 탭: [이름, 나오는 장면, 원리, 이 작품에서]
+    ['가중치 그래프', '1장면',
+      '사람은 점, 관계는 선으로 나타내고, 선마다 관계의 깊이를 뜻하는 숫자(가중치)를 붙인다. 연결된 선의 개수를 ‘차수’라고 한다.',
+      '선의 굵기 = 최근 실제로 주고받은 대화량(0~1). 새봄의 팔로워는 1,024명이고 화면에 보이는 연결(차수)만 16개지만, 그 가중치의 합은 약 3.1, 평균 0.19에 불과하다. 연결의 ‘수’와 ‘깊이’는 다르다. 제목 ‘가중치 0’은 여기서 왔다.'],
+    ['추천 점수식', '1·2장면',
+      '추천 AI는 사람마다 점수를 계산해 점수가 큰 순서로 보여 준다. 어떤 값을 점수로 삼느냐(목적함수)가 결과를 정한다.',
+      '피드 AI: <span class="fx">점수 = 최근 활동량</span> → 하린(98)이 1위.<br>엣지: <span class="fx">점수 = 예전 친밀도 × 감소율</span>, <span class="fx">감소율 = (예전 − 지금) ÷ 예전</span> → 정리하면 <span class="fx">예전 − 지금</span>. 서윤은 약 0.85 − 0.05 = 0.8로 1위가 된다. 기준 하나로 누가 보이고 누가 잊히는지가 바뀐다.'],
+    ['코사인 유사도', '3장면',
+      '두 벡터가 같은 방향을 가리키는 정도. <span class="fx">cos θ = (A·B) ÷ (|A|×|B|)</span>, 값이 1에 가까울수록 비슷하다. 추천 AI가 ‘비슷한 것’을 찾을 때 쓰는 대표적인 방법이다.',
+      '직접 쓴 문장을 글자 2개씩 묶은 벡터(2-gram)로 바꾼다. 예: ‘바닷가’ → [바닷, 닷가]. 이 벡터와 세 기억(바닷가·포스터·급식) 사이의 코사인 유사도가 0.2 이상이거나 기억과 관련된 낱말이 들어 있으면 ‘연결됨’으로 판단한다.'],
+    ['편집 거리', '3장면',
+      '한 문장을 다른 문장으로 바꾸는 데 필요한 최소 글자 수정(넣기·지우기·바꾸기) 횟수(Levenshtein, 1966). 예: ‘잘 지내?’ → ‘잘 지냈어?’는 2.',
+      '엣지의 초안과 실제로 보낸 문장의 편집 거리를 보여 준다. 다만 연결의 굵기는 많이 고친 정도가 아니라 둘만 아는 내용의 수 k로 정했다. <span class="fx">연결 굵기 = 0.15 + 0.25 × k</span>'],
+    ['선호적 연결', '4장면',
+      '이미 연결이 많은 점이 새 연결을 더 많이 얻는 ‘부익부’ 구조(Barabási·Albert, 1999). SNS 팔로워나 조회수가 한쪽으로 몰리는 현상을 설명한다.',
+      '24명의 8주 시뮬레이션. 추천될 확률은 <span class="fx">(연결 굵기의 합)²</span>에 비례한다. 매주 모든 선은 <span class="fx">w ← 0.75 × w</span>로 가늘어지고, 대화 한 번마다 <span class="fx">w ← w + 0.15</span>로 굵어진다. 연결 굵기의 합이 0.35보다 작으면 ‘흐려진 사람’이다. 엣지의 세계에서는 추천의 절반을 ‘예전 − 지금’이 가장 큰 선에 쓴다. (실제 데이터가 아닌 단순화한 가상 모델)'],
+    ['소리로 듣는 데이터', '1·3·4장면',
+      '데이터의 크기를 소리의 높이·개수·크기로 바꿔 귀로 듣게 하는 방법(데이터 소니피케이션).',
+      '서윤과의 선이 가늘어질수록 서윤의 음이 작아진다. 둘만 아는 내용이 하나 늘 때마다 화음에 음이 하나씩 더해진다. 8주 장면에서는 <span class="fx">음 개수 = 연결이 살아 있는 사람 수 ÷ 4</span>이며, 피드 AI의 세계는 왼쪽 스피커에서 어두운 단조로, 엣지의 세계는 오른쪽 스피커에서 밝은 장조로 울린다.'],
+  ],
+  credits: [   // '만든 사람' 탭
     ['작품', '가중치 0 — 2026 포항 청소년 인공지능예술작품 특별 공모 출품작'],
-    ['제작', '○○○ (포항여자고등학교)'],
+    ['제작', '포항여자고등학교 1학년 4반 유다현'],
     ['소리', '연결의 굵기를 화음으로 바꾸어 실시간으로 생성 (Web Audio)'],
-    ['그림', '장면 일러스트(피드 사진·기억 사진): ChatGPT(OpenAI) 이미지 생성 / 캐릭터와 관계망 그래프: 코드로 직접 그림'],
+    ['그림', '장면 일러스트(피드 사진·기억 사진·새봄): ChatGPT(OpenAI) 이미지 생성 / 관계망 그래프: 코드로 직접 그림'],
+    ['개발', 'Claude(Anthropic)와 함께 바이브코딩으로 제작'],
     ['시뮬레이션', '8주 시뮬레이션은 규칙을 단순화한 가상 모델이며, 실제 사용자 데이터가 아님'],
     ['참고', 'Barabási & Albert(1999), Levenshtein(1966), 고립·은둔 청년 실태 보도(2023)'],
   ],
@@ -478,7 +531,7 @@ const FRIENDS = [
 const $ = (s) => document.querySelector(s);
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stage = $('#stage');
-const G = { cast: null, scene: 'title', feedIdx: 0, mode: 'feed', unlocked: [false, false, false], pick: [0, 0, 0], k: 0, ed: 0, w: .15, sent: false };
+const G = { scene: 'title', feedIdx: 0, mode: 'feed', unlocked: [false, false, false], pick: [0, 0, 0], k: 0, ed: 0, w: .15, sent: false };
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
@@ -561,7 +614,6 @@ function relayout() {
   if (portrait) { const h = clamp(H - 404 - 78, 250, 380); Object.assign(EG, { w: 416, h, cx: 208, cy: h / 2 - 4, rmin: 46, rmax: 150, ry: clamp((h / 2 - 34) / 196, .55, .8) }); }
   else Object.assign(EG, { w: 562, h: 352, cx: 281, cy: 172, rmin: 64, rmax: 200, ry: .6 });
   ego.width = EG.w * 2; ego.height = EG.h * 2; ego.style.width = EG.w + 'px'; ego.style.height = EG.h + 'px'; ectx.setTransform(2, 0, 0, 2, 0, 0);
-  if (G.scene === 'night' && G.cast) G.cast();
   if (!reduceMotion) return; drawBg();
 }
 window.addEventListener('resize', fit);
@@ -599,7 +651,7 @@ $('#mathBtn').addEventListener('click', () => { const b = $('#mathBtn'); b.setAt
 /* 캐릭터 */
 const CHAR = { '새봄': 'c-saebom', '엣지': 'c-edge' };
 function place(id, x, y) { const el = $('#' + id);
-  if (LAYOUT.portrait) { const H = LAYOUT.H; [x, y] = id === 'c-edge' ? [340, H - 250] : [4, H - 400]; } el.style.left = x + 'px'; el.style.top = y + 'px'; el.classList.remove('on', 'dim'); }
+  if (LAYOUT.portrait) { const H = LAYOUT.H; [x, y] = id === 'c-edge' ? [340, H - 250] : [10, H - 300]; } el.style.left = x + 'px'; el.style.top = y + 'px'; el.classList.remove('on', 'dim'); }
 function hideCast() { Object.values(CHAR).forEach((id) => $('#' + id).classList.remove('on', 'dim')); }
 function setSpeaker(who) { Object.entries(CHAR).forEach(([n, id]) => { const el = $('#' + id); if (el.classList.contains('on')) el.classList.toggle('dim', !!who && who !== '나레이션' && n !== who); }); }
 
@@ -672,7 +724,8 @@ function enter(name, opt = {}) {
 }
 
 /* ================= 타이틀 ================= */
-function initTitle() { BG.dim = 0; setPhase('title'); }
+const mood = (m) => { stage.dataset.mood = m; };   // 새봄 프로필 사진의 색: gray(외로움) → half → color(연결)
+function initTitle() { BG.dim = 0; setPhase('title'); mood('gray'); }
 $('#startBtn').addEventListener('click', () => { audioInit(); nav('night'); });
 
 /* ================= 1·2 숫자의 밤 / 엣지의 알림 ================= */
@@ -719,6 +772,7 @@ function renderRank() {
   $('#rank').innerHTML = '<b>추천 순위</b><br>' + list.map((x, i) => `${i + 1}. ${x.n} · ${G.mode === 'feed' ? x.s : x.s.toFixed(2)}`).join('<br>');
 }
 function initNight(opt = {}) {
+  mood('gray');
   BG.dim = .55; G.mode = 'feed'; G.feedIdx = 0; NODES.forEach((n, i) => { n.target = n.now = FRIENDS[i][2]; });
   $('#formulaText').textContent = '점수 = 최근 활동량'; $('#formulaText').classList.remove('edge'); $('#formulaLbl').textContent = '피드 AI의 추천 점수';
   $('#phoneTitle').textContent = '피드'; $('#feedBody').innerHTML = ''; $('#nextPost').hidden = true; $('#feedCount').textContent = '';
@@ -751,7 +805,7 @@ $('#nextPost').addEventListener('click', () => {
   say(SCRIPT.afterFeed, startEdge);
 });
 function setEdgeMode(sound = true) {
-  G.mode = 'edge'; if (sound) { pluck(74, 0, 0, .08, 1.4, 'sine'); pluck(79, .14, 0, .08, 1.6, 'sine'); } setPad([41, 48, 57]);
+  G.mode = 'edge'; mood('half'); if (sound) { pluck(74, 0, 0, .08, 1.4, 'sine'); pluck(79, .14, 0, .08, 1.6, 'sine'); } setPad([41, 48, 57]);
   $('#formulaLbl').textContent = '엣지의 추천 점수'; $('#formulaText').textContent = '점수 = 예전 친밀도 × 감소율'; $('#formulaText').classList.add('edge'); renderRank();
 }
 function startEdge() {
@@ -796,7 +850,7 @@ function update() {
   const sel = G.free ? G.match : G.pick;
   G.k = sel.reduce((s, v) => s + v, 0); G.ed = editDistance(draftText(), currentText()); G.w = .15 + .25 * G.k;
   $('#preview').textContent = currentText(); $('#kVal').textContent = `${G.k} / 3`; $('#edVal').textContent = G.ed;
-  renderSlots(); drawTie(G.w); setTieChord(G.k);
+  renderSlots(); drawTie(G.w); setTieChord(G.k); mood(G.k >= 1 ? 'color' : 'half');
 }
 function drawTie(w) {
   const c = tctx; c.clearRect(0, 0, 150, 26);
@@ -833,6 +887,7 @@ $('#modeBtn').addEventListener('click', () => {      // 조각 고르기 ↔ 직
   update(); if (G.free) $('#freeText').focus();
 });
 $('#freeText').addEventListener('input', update);
+$('#freeText').addEventListener('blur', () => setTimeout(fit, 250));
 function buildReply() {
   const R = SCRIPT.replies, p = G.free ? G.match : G.pick; if (G.k === 0) return R.none;
   const parts = []; if (p[0]) parts.push(R.sea); if (p[1]) parts.push(R.poster);
@@ -908,13 +963,14 @@ function drawWorld(cv, g, edges, edgeAI) {
     const f = s[i] < .35; if (f) faded++;
     c.fillStyle = i === g.me ? '#ffb35c' : f ? 'rgba(91,85,104,.7)' : '#efe6f6';
     c.beginPath(); c.arc(X(g.pts[i]), Y(g.pts[i]), f ? 3.5 : 3.5 + 2.2 * Math.sqrt(Math.min(s[i], 6)), 0, 7); c.fill();
-    if (i === g.me || i === g.her) { c.fillStyle = i === g.me ? '#ffb35c' : f ? '#8a8299' : '#c9b8e6'; c.font = '11px "Gowun Dodum", sans-serif'; c.textAlign = 'center'; c.fillText(i === g.me ? '새봄' : '서윤', X(g.pts[i]), Y(g.pts[i]) - 10); }
+    if (i === g.me || i === g.her) { c.fillStyle = i === g.me ? '#ffb35c' : f ? '#8a8299' : '#c9b8e6'; c.font = '11px "Gowun Dodum", sans-serif'; c.textAlign = 'center'; c.fillText(i === g.me ? '새봄' : '서윤', X(g.pts[i]), Y(g.pts[i]) - 13); }
+    if (i === g.her) { c.strokeStyle = f ? 'rgba(201,184,230,.4)' : '#c9b8e6'; c.lineWidth = 1.5; c.beginPath(); c.arc(X(g.pts[i]), Y(g.pts[i]), 9.5, 0, 7); c.stroke(); }
   }
   return faded;
 }
 function lerpSnap(a, b, t) { return b.map((e, i) => [e[0], e[1], (a[i] ? a[i][2] : 0) * (1 - t) + e[2] * t]); }
 function initAfter() {
-  BG.dim = .6; setPhase('after'); resetFinale();
+  BG.dim = .6; setPhase('after'); resetFinale(); mood(G.k >= 1 ? 'color' : 'half');
   const L = simulate('feed'), Rt = simulate('edge'); G.sim = { L, Rt };
   const T = 8, per = reduceMotion ? 1 : 750, t0 = performance.now(), tk = G.token; let lastWk = -1;
   const frame = (now) => {
@@ -928,7 +984,7 @@ function initAfter() {
     if (t < T) requestAnimationFrame(frame);
     else {
       [57, 64, 69, 73, 76, 81].forEach((m, i) => pluck(m, i * .06, .3, .07, 3.2));   // 8주 끝: 밝은 화음으로 마무리
-      place('c-edge', 438, 150); say(SCRIPT.afterSim, finale);
+      place('c-saebom', 40, 200); place('c-edge', 438, 150); say(SCRIPT.afterSim, finale);
     }
   };
   requestAnimationFrame(frame);
@@ -936,7 +992,7 @@ function initAfter() {
 function resetFinale() {
   const f = $('#finale'); f.hidden = true; f.classList.remove('dark');
   ['#finLine', '#finSub', '#finStats', '#finBtns', '#finBg'].forEach((q) => $(q).classList.remove('on'));
-  $('#mathList').hidden = true; $('#credits').hidden = true; $('#mathListBtn').textContent = '수학 노트'; $('#creditBtn').textContent = '만든 사람';
+  $('#info').hidden = true;
 }
 function finale() {
   /* ① 엣지의 선이 사라지고 ② 소리가 멈춘 뒤 ③ 정적 속에 마지막 문장 */
@@ -947,9 +1003,7 @@ function finale() {
   $('#finLine').innerHTML = SCRIPT.endLine;
   $('#finSub').textContent = G.k >= 2 ? SCRIPT.endSub.good : G.k === 1 ? SCRIPT.endSub.mid : SCRIPT.endSub.none;
   $('#finBg').className = G.k >= 2 ? '' : G.k === 1 ? 'mid' : 'none'; $('#finBg').style.backgroundImage = `url(${IMG.sea})`;
-  $('#finStats').innerHTML = `둘만 아는 내용 <span class="num">${G.k} / 3</span> · 편집 거리 <span class="num">${G.ed}</span> · 서윤과의 연결 굵기 <span class="num">0.05 → ${G.w.toFixed(2)}</span>`;
-  $('#mathList').innerHTML = '<h3>이 이야기에 쓰인 수학과 AI</h3><dl>' + SCRIPT.mathNotes.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('') + '</dl><span class="closeHint">누르면 닫힙니다</span>';
-  $('#credits').innerHTML = '<h3>만든 사람</h3>' + SCRIPT.credits.map(([a, b]) => `<p><b>${a}</b>${b}</p>`).join('') + '<span class="closeHint">누르면 닫힙니다</span>';
+  $('#finStats').innerHTML = `결말 「${SCRIPT.endName[G.k >= 2 ? 'good' : G.k === 1 ? 'mid' : 'none']}」 · 세 가지 결말 중 하나<br>둘만 아는 내용 <span class="num">${G.k} / 3</span> · 편집 거리 <span class="num">${G.ed}</span> · 서윤과의 연결 굵기 <span class="num">0.05 → ${G.w.toFixed(2)}</span>`;
   setTimeout(() => { if (tk !== G.token) return; const f = $('#finale'); f.hidden = false; requestAnimationFrame(() => f.classList.add('dark')); }, D1);
   setTimeout(() => {
     if (tk !== G.token) return;
@@ -957,14 +1011,20 @@ function finale() {
     bell(69); ['#finLine', '#finSub', '#finStats', '#finBtns', '#finBg'].forEach((q) => $(q).classList.add('on'));
   }, reduceMotion ? 0 : D1 + 2600);
 }
-function toggleOverlay(id, btn, label) {
-  const m = $(id), other = id === '#mathList' ? '#credits' : '#mathList'; $(other).hidden = true;
-  $('#mathListBtn').textContent = '수학 노트'; $('#creditBtn').textContent = '만든 사람';
-  m.hidden = !m.hidden; if (!m.hidden) $(btn).textContent = '닫기';
+function openInfo(tab) {                 // 작품 설명 / 인공지능 수학의 원리 / 만든 사람
+  $('#info').hidden = false;
+  document.querySelectorAll('#info [data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  const body = $('#infoBody');
+  if (tab === 'about') body.innerHTML = SCRIPT.about.map(([h, t]) => `<h3>${h}</h3>${t}`).join('');
+  else if (tab === 'math') body.innerHTML = '<p class="lead">이 작품의 장면마다 실제로 계산되고 있는 수학과 인공지능의 원리입니다.</p>' +
+    SCRIPT.mathNotes.map(([t, sc, rule, here]) => `<section class="mcard"><div class="mhead"><b>${t}</b><span class="sc">${sc}</span></div><p><em>원리</em>${rule}</p><p><em>이 작품에서</em>${here}</p></section>`).join('');
+  else body.innerHTML = SCRIPT.credits.map(([a, b]) => `<p class="cr"><b>${a}</b>${b}</p>`).join('');
+  body.scrollTop = 0;
 }
-$('#mathListBtn').addEventListener('click', () => toggleOverlay('#mathList', '#mathListBtn'));
-$('#creditBtn').addEventListener('click', () => toggleOverlay('#credits', '#creditBtn'));
-['#mathList', '#credits'].forEach((id) => $(id).addEventListener('click', () => { $(id).hidden = true; $('#mathListBtn').textContent = '수학 노트'; $('#creditBtn').textContent = '만든 사람'; }));
+document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); openInfo(b.dataset.open); }));
+document.querySelectorAll('#info [data-tab]').forEach((b) => b.addEventListener('click', () => openInfo(b.dataset.tab)));
+$('#infoClose').addEventListener('click', () => { $('#info').hidden = true; });
+document.addEventListener('keydown', (e) => { if (e.code === 'Escape') $('#info').hidden = true; });
 $('#restartBtn').addEventListener('click', () => nav('title'));
 
 /* ---------- 이미지 (ChatGPT 이미지 생성, 파일 안에 내장) ---------- */
@@ -980,52 +1040,6 @@ const IMG = {
   seoyun: 'data:image/jpeg;base64,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'
 };
 
-/* ---------- 캐릭터 그림: 얼굴·머리·옷을 조합해 그림 ---------- */
-function charSVG(o, viewBox = '0 0 200 300') {
-  const k = o.id, u = (n) => `url(#${k}${n})`;
-  const eye = (cx, lash) => `<ellipse cx="${cx}" cy="107" rx="9.5" ry="8.2" fill="#fffaf6"/>
-    <g clip-path="url(#${k}${cx})"><circle cx="${cx}" cy="108.6" r="7.1" fill="${u('i')}"/><circle cx="${cx}" cy="108.6" r="3" fill="#1b0f0b"/>
-    <circle cx="${cx + 2.6}" cy="105.2" r="2.3" fill="#fff"/><circle cx="${cx - 2.4}" cy="111.6" r="1" fill="#fff" opacity=".75"/></g>
-    <path d="${lash}" stroke="#2a1a14" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
-  return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
-    <linearGradient id="${k}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${o.hair2}"/><stop offset="1" stop-color="${o.hair}"/></linearGradient>
-    <linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9e3d2"/><stop offset="1" stop-color="#efc8b0"/></linearGradient>
-    <linearGradient id="${k}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${o.cloth2}"/><stop offset="1" stop-color="${o.cloth}"/></linearGradient>
-    <radialGradient id="${k}i" cx=".5" cy=".35" r=".65"><stop offset="0" stop-color="${o.iris2}"/><stop offset="1" stop-color="${o.iris}"/></radialGradient>
-    <clipPath id="${k}81"><ellipse cx="81" cy="107" rx="9.5" ry="8.2"/></clipPath><clipPath id="${k}119"><ellipse cx="119" cy="107" rx="9.5" ry="8.2"/></clipPath></defs>
-    <g fill="${u('h')}">${o.backHair}</g>
-    <path d="M86 144 L114 144 L116 186 Q100 196 84 186 Z" fill="${u('s')}"/>
-    <path d="M86 150 Q100 168 114 150 L114 162 Q100 174 86 162 Z" fill="#d6a48b" opacity=".5"/>
-    <path d="M30 300 L32 238 Q38 200 82 186 Q100 198 118 186 Q162 200 168 238 L170 300 Z" fill="${u('c')}"/>
-    <path d="M58 248 Q66 272 62 300 M142 248 Q134 272 138 300" stroke="rgba(0,0,0,.14)" stroke-width="2" fill="none"/>
-    ${o.top}
-    <ellipse cx="62.5" cy="109" rx="6" ry="9" fill="#efc3a9"/><ellipse cx="137.5" cy="109" rx="6" ry="9" fill="#efc3a9"/>
-    <path d="M62 94 Q62 142 100 160 Q138 142 138 94 Q138 58 100 56 Q62 58 62 94 Z" fill="${u('s')}"/>
-    <ellipse cx="76" cy="125" rx="7.5" ry="3.6" fill="#f3a2a0" opacity=".36"/><ellipse cx="124" cy="125" rx="7.5" ry="3.6" fill="#f3a2a0" opacity=".36"/>
-    <g class="eyes">${eye(81, 'M70.5 104 Q80 96.5 92 102.5')}${eye(119, 'M108 102.5 Q120 96.5 129.5 104')}</g>
-    <path d="M72.5 91.5 Q81 87.5 89.5 90.5 M110.5 90.5 Q119 87.5 127.5 91.5" stroke="${o.hair2}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-    <path d="M100.5 117 Q102.6 121 99.6 123" stroke="#d6a38a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-    <path d="${o.mouth}" stroke="#b5615a" stroke-width="2.1" fill="none" stroke-linecap="round"/>
-    <g fill="${u('h')}">${o.frontHair}</g>
-    <path d="M76 62 Q100 52 124 62" stroke="rgba(255,255,255,.17)" stroke-width="4" fill="none" stroke-linecap="round"/>
-    ${o.extra || ''}</svg>`;
-}
-const SAEBOM = { id: 'sb', hair: '#24170f', hair2: '#4d3226', cloth: '#26325c', cloth2: '#3e5188', iris: '#3a2318', iris2: '#9a6544',
-  backHair: '<path d="M56 100 Q50 44 100 38 Q150 44 144 100 L150 168 Q136 176 124 166 L76 166 Q64 176 50 168 Z"/>',
-  top: `<path d="M138 138 Q172 168 156 238 Q147 204 128 180 Z" fill="url(#sbh)"/><circle cx="137" cy="146" r="4.5" fill="#6fe3c1"/>
-    <path d="M82 186 L100 208 L118 186 L113 232 L87 232 Z" fill="#f4f1ec"/>
-    <path d="M82 186 L100 242 L118 186" stroke="#1d2749" stroke-width="3" fill="none"/>
-    <path d="M84 186 L100 207 L92 212 L77 194 Z M116 186 L100 207 L108 212 L123 194 Z" fill="#fff"/>
-    <path d="M100 210 L88 203 L88 218 Z M100 210 L112 203 L112 218 Z" fill="#c4505c"/><circle cx="100" cy="210" r="3.4" fill="#a43e4a"/>
-    <circle cx="96" cy="262" r="2.4" fill="#1d2749"/><circle cx="96" cy="282" r="2.4" fill="#1d2749"/>`,
-  mouth: 'M93.5 134 Q100 137.6 106.5 134',
-  frontHair: '<path d="M60 100 Q56 50 100 46 Q146 50 140 100 Q134 80 120 70 Q116 86 102 92 Q106 78 100 66 Q88 86 70 94 Q76 80 78 72 Q68 84 60 100 Z"/><path d="M61 96 Q55 132 64 162 Q68 140 70 112 Z"/><path d="M139 96 Q145 132 136 162 Q132 140 130 112 Z"/>' };
-const SEOYUN = { id: 'sy', hair: '#1c1520', hair2: '#43334a', cloth: '#7f6ca6', cloth2: '#ad9bd0', iris: '#2b2135', iris2: '#76619a',
-  backHair: '<path d="M54 100 Q48 40 100 34 Q152 40 146 100 L156 250 Q100 262 44 250 Z"/>',
-  top: '<path d="M84 186 Q100 206 116 186 L112 200 Q100 212 88 200 Z" fill="#f4f1ec"/>',
-  mouth: 'M94.5 134 Q100 135.6 105.5 134',
-  frontHair: '<path d="M60 98 Q58 48 100 44 Q142 48 140 98 Q136 88 128 86 Q114 90 100 88 Q86 90 72 86 Q64 88 60 98 Z"/><path d="M60 92 Q52 150 58 214 Q66 172 70 110 Z"/><path d="M140 92 Q148 150 142 214 Q134 172 130 110 Z"/>' };
-
 /* 시작 */
 function start() {
   $('#c-saebom').innerHTML = `<img src="${IMG.saebom}" alt="새봄">`; $('#seoAvatar').innerHTML = `<img src="${IMG.seoyun}" alt="서윤">`;
@@ -1034,3 +1048,6 @@ function start() {
 }
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start();
 </script>
+
+</body>
+</html>
